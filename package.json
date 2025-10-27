@@ -1,0 +1,27 @@
+{
+  "name": "omnichannel",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev:web": "turbo run dev --filter @omnichannel/web",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.8",
+    "typescript": "5.8.3"
+  },
+  "packageManager": "bun@1.3.1",
+  "engines": {
+    "bun": ">=1.3.1"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "dependencies": {
+    "zod": "3"
+  }
+}
