@@ -11,6 +11,6 @@ export default defineConfig({
   },
   migrations: {
     schema: "public",
-    table: "postgres",
+    table: "migrationsHistory",
   },
 });

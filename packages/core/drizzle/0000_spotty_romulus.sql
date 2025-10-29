@@ -1,15 +1,3 @@
-CREATE TABLE "addresses" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"street" text NOT NULL,
-	"number" varchar(10) NOT NULL,
-	"neighborhood" text NOT NULL,
-	"city" text NOT NULL,
-	"state" varchar(2) NOT NULL,
-	"zip_code" varchar(10) NOT NULL,
-	"country" text DEFAULT '' NOT NULL,
-	"note" text
-);
---> statement-breakpoint
 CREATE TABLE "channels" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" text DEFAULT '' NOT NULL,
@@ -18,14 +6,6 @@ CREATE TABLE "channels" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"status" text DEFAULT 'disconnected' NOT NULL,
 	"type" text DEFAULT 'whatsapp' NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "clients" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"partner_id" text,
-	"contact_phone" varchar(15),
-	"address_id" uuid,
-	"workspace_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "contacts" (
@@ -55,13 +35,6 @@ CREATE TABLE "memberships" (
 	"permissions" text[] DEFAULT '{}' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "message_buffer" (
-	"message_id" text PRIMARY KEY NOT NULL,
-	"content" text NOT NULL,
-	"sender" text NOT NULL,
-	"timestamp" integer NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "messages" (
 	"id" text PRIMARY KEY NOT NULL,
 	"content" text NOT NULL,
@@ -82,35 +55,6 @@ CREATE TABLE "sectors" (
 	"workspace_id" uuid
 );
 --> statement-breakpoint
-CREATE TABLE "settings" (
-	"id" uuid PRIMARY KEY NOT NULL,
-	"access_token" text DEFAULT '' NOT NULL,
-	"waba_id" text DEFAULT '' NOT NULL,
-	"phone_id" text DEFAULT '' NOT NULL,
-	"workspace_id" uuid NOT NULL,
-	"attendant_name" text DEFAULT '' NOT NULL,
-	"business_id" text DEFAULT '' NOT NULL,
-	"business_name" text DEFAULT '' NOT NULL,
-	"location_available" text DEFAULT '' NOT NULL,
-	"opening_hours" text DEFAULT '' NOT NULL,
-	"payment_methods" text DEFAULT '' NOT NULL,
-	"knowledge_base" text DEFAULT '' NOT NULL,
-	"ai_enabled" boolean DEFAULT true NOT NULL,
-	"queue_url" text DEFAULT '' NOT NULL,
-	"delivery_fee_url" text DEFAULT '' NOT NULL,
-	"ai_flow_url" text DEFAULT '' NOT NULL,
-	"store_address" text DEFAULT '' NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "tools_results_buffer" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"toolName" text NOT NULL,
-	"contact" text NOT NULL,
-	"channel" text NOT NULL,
-	"content" text NOT NULL,
-	"timestamp" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"name" text DEFAULT '' NOT NULL,
@@ -128,9 +72,6 @@ CREATE TABLE "workspaces" (
 );
 --> statement-breakpoint
 ALTER TABLE "channels" ADD CONSTRAINT "channels_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "clients" ADD CONSTRAINT "clients_contact_phone_contacts_phone_fk" FOREIGN KEY ("contact_phone") REFERENCES "public"."contacts"("phone") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "clients" ADD CONSTRAINT "clients_address_id_addresses_id_fk" FOREIGN KEY ("address_id") REFERENCES "public"."addresses"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "clients" ADD CONSTRAINT "clients_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "conversations" ADD CONSTRAINT "conversations_channel_channels_id_fk" FOREIGN KEY ("channel") REFERENCES "public"."channels"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "conversations" ADD CONSTRAINT "conversations_sector_id_sectors_id_fk" FOREIGN KEY ("sector_id") REFERENCES "public"."sectors"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "conversations" ADD CONSTRAINT "conversations_contact_phone_contacts_phone_fk" FOREIGN KEY ("contact_phone") REFERENCES "public"."contacts"("phone") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -140,5 +81,4 @@ ALTER TABLE "memberships" ADD CONSTRAINT "memberships_user_id_users_id_fk" FOREI
 ALTER TABLE "memberships" ADD CONSTRAINT "memberships_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_conversation_id_conversations_id_fk" FOREIGN KEY ("conversation_id") REFERENCES "public"."conversations"("id") ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE "sectors" ADD CONSTRAINT "sectors_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "settings" ADD CONSTRAINT "settings_workspace_id_workspaces_id_fk" FOREIGN KEY ("workspace_id") REFERENCES "public"."workspaces"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "users" ADD CONSTRAINT "users_sector_id_sectors_id_fk" FOREIGN KEY ("sector_id") REFERENCES "public"."sectors"("id") ON DELETE no action ON UPDATE no action;
