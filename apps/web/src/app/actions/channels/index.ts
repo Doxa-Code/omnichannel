@@ -18,15 +18,20 @@ export const upsertChannel = securityProcedure(["manage:carts"])
     z.object({
       id: z.string().optional(),
       name: z.string(),
+      type: z.enum(["whatsapp", "instagram"])
     })
   )
   .handler(async ({ input, ctx }) => {
-    let channel = await channelsRepository.retrieve(
-      input.id ?? ""
-    );
+    let channel
+
+    if (typeof input.id === "string" && input.id.trim() !== "") {
+      channel = await channelsRepository.retrieve(
+        input.id ?? ""
+      );
+    }
 
     if (!channel) {
-      channel = Channel.create(input.name);
+      channel = Channel.create(input.name, input.type);
     } else {
       channel.setName(input.name);
     }
@@ -38,7 +43,7 @@ export const connectChannel = securityProcedure(["manage:connections"])
   .input(
     z.object({
       id: z.string(),
-      type: z.enum(["whatsapp"]),
+      type: z.enum(["whatsapp", "instagram"]),
       inputPayload: z.any().optional(),
     })
   )

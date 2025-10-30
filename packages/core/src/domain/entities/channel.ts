@@ -1,6 +1,6 @@
 export namespace Channel {
   export type Status = "connected" | "disconnected";
-  export type Type = "whatsapp";
+  export type Type = "whatsapp" | "instagram";
   export interface Props {
     id: string;
     name: string;
@@ -53,7 +53,7 @@ export class Channel {
     return new Channel(props);
   }
 
-  static create(name: string, type: Channel.Type = "whatsapp") {
+  static create(name: string, type: Channel.Type) {
     return new Channel({
       id: crypto.randomUUID().toString(),
       name: name || "",
