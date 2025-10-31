@@ -25,16 +25,11 @@ import { toast } from "@/hooks/use-toast";
 import { Channel } from "@omnichannel/core/domain/entities/channel";
 import { useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "flowbite-react";
-import {
-  Edit,
-  Trash,
-  Wifi,
-  WifiOff
-} from "lucide-react";
+import { Edit, Trash, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import ModalConfirmDelete from "./modal-confirm-delete";
 import { Badge } from "./ui/badge";
-import { createConnectHandlers } from "../lib/connect-handlers"
+import { ProxyConnectHandler } from "../lib/connect-handlers";
 
 type Props = {
   channels: Channel.Raw[];
@@ -58,9 +53,11 @@ export default function TableChannels(props: Props) {
       });
       await queryClient.invalidateQueries({ queryKey: ["list-channels"] });
     },
+    async onError(error, variables, onMutateResult, context) {
+      
+    },
   });
 
-  const connectHandlers = createConnectHandlers(connectChannelAction.mutate);
 
   const disconnectChannelAction = useServerActionMutation(disconnectChannel, {
     async onSuccess() {
@@ -87,27 +84,6 @@ export default function TableChannels(props: Props) {
     [data, props.channels]
   );
 
-  useEffect(() => {
-    window.fbAsyncInit = function () {
-      FB.init({
-        appId: "579228267872440",
-        autoLogAppEvents: true,
-        xfbml: true,
-        version: "v23.0",
-      });
-    };
-
-    (function (d, s, id) {
-      var js,
-        fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) return;
-      js = d.createElement(s) as HTMLScriptElement;
-      js.id = id;
-      js.src = "https://connect.facebook.net/en_US/sdk.js";
-      fjs.parentNode?.insertBefore(js, fjs);
-    })(document, "script", "facebook-jssdk");
-  }, []);
-
   return (
     <div className="space-y-4 relative h-full flex flex-col">
       {/* Table */}
@@ -128,84 +104,83 @@ export default function TableChannels(props: Props) {
           <TableBody>
             {channels?.length
               ? channels.map((channel) => (
-                <TableRow key={channel.id}>
-                  <TableCell className="py-2">
-                    <TableChannelIcon type={channel.type} />
-                  </TableCell>
-                  <TableCell className="py-2">{channel.name}</TableCell>
-                  <TableCell className="py-2">
-                    {channel.type === "whatsapp"
-                      ? channel.payload.phoneNumber || "-"
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="data-[danger=true]:text-rose-500 py-2">
-                    {channel.status === "connected" ? (
-                      <Badge className="bg-transparent text-green-500 border border-green-500">
-                        <div className="size-2 rounded-full bg-green-500" />
-                        <span>Conectado</span>
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-transparent text-rose-500 border border-rose-500">
-                        <div className="size-2 rounded-full bg-rose-500" />
-                        <span>Desconectado</span>
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="py-2 gap-2 flex items-center">
-                    <Button
-                      onClick={() => {
-                        setChannelIdOnConnecting(channel.id);
-                        const handler = connectHandlers[channel.type];
-                        if (handler) handler(Channel.instance(channel));
-                      }}
-                      hidden={channel.status === "connected"}
-                      variant="outline"
-                    >
-                      {channelIdOnConnecting === channel.id && isPending ? (
-                        <Spinner className="size-3" />
+                  <TableRow key={channel.id}>
+                    <TableCell className="py-2">
+                      <TableChannelIcon type={channel.type} />
+                    </TableCell>
+                    <TableCell className="py-2">{channel.name}</TableCell>
+                    <TableCell className="py-2">
+                      {channel.type === "whatsapp"
+                        ? channel.payload.phoneNumber || "-"
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="data-[danger=true]:text-rose-500 py-2">
+                      {channel.status === "connected" ? (
+                        <Badge className="bg-transparent text-green-500 border border-green-500">
+                          <div className="size-2 rounded-full bg-green-500" />
+                          <span>Conectado</span>
+                        </Badge>
                       ) : (
-                        <Wifi className="size-3" />
+                        <Badge className="bg-transparent text-rose-500 border border-rose-500">
+                          <div className="size-2 rounded-full bg-rose-500" />
+                          <span>Desconectado</span>
+                        </Badge>
                       )}
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setChannelValues(channel.id, channel.name);
-                        toggleOpen();
-                      }}
-                      variant="outline"
-                      className="border-blue-200 hover:bg-blue-100"
-                    >
-                      <Edit className="size-3 stroke-blue-500" />
-                    </Button>
-                    <ModalConfirmDelete
-                      hidden={channel.status === "disconnected"}
-                      resourceName={channel.name}
-                      title="Desconectar canal"
-                      content="Tem certeza que deseja desconectar este canal?"
-                      onConfirm={() => {
-                        disconnectChannelAction.mutate({ id: channel.id });
-                      }}
-                    >
-                      <Button variant="outline">
-                        <WifiOff className="size-3" />
-                      </Button>
-                    </ModalConfirmDelete>
-                    <ModalConfirmDelete
-                      resourceName={channel.name}
-                      onConfirm={() => {
-                        removeChannelAction.mutate({ id: channel.id });
-                      }}
-                    >
+                    </TableCell>
+                    <TableCell className="py-2 gap-2 flex items-center">
                       <Button
+                        onClick={async () => {
+                          setChannelIdOnConnecting(channel.id);
+                          await ProxyConnectHandler.instance().connect(channel, connectChannelAction.mutate)
+                        }}
+                        hidden={channel.status === "connected"}
                         variant="outline"
-                        className="border-rose-200 hover:bg-rose-100"
                       >
-                        <Trash className="size-3 stroke-rose-500" />
+                        {channelIdOnConnecting === channel.id && isPending ? (
+                          <Spinner className="size-3" />
+                        ) : (
+                          <Wifi className="size-3" />
+                        )}
                       </Button>
-                    </ModalConfirmDelete>
-                  </TableCell>
-                </TableRow>
-              ))
+                      <Button
+                        onClick={() => {
+                          setChannelValues(channel.id, channel.name);
+                          toggleOpen();
+                        }}
+                        variant="outline"
+                        className="border-blue-200 hover:bg-blue-100"
+                      >
+                        <Edit className="size-3 stroke-blue-500" />
+                      </Button>
+                      <ModalConfirmDelete
+                        hidden={channel.status === "disconnected"}
+                        resourceName={channel.name}
+                        title="Desconectar canal"
+                        content="Tem certeza que deseja desconectar este canal?"
+                        onConfirm={() => {
+                          disconnectChannelAction.mutate({ id: channel.id });
+                        }}
+                      >
+                        <Button variant="outline">
+                          <WifiOff className="size-3" />
+                        </Button>
+                      </ModalConfirmDelete>
+                      <ModalConfirmDelete
+                        resourceName={channel.name}
+                        onConfirm={() => {
+                          removeChannelAction.mutate({ id: channel.id });
+                        }}
+                      >
+                        <Button
+                          variant="outline"
+                          className="border-rose-200 hover:bg-rose-100"
+                        >
+                          <Trash className="size-3 stroke-rose-500" />
+                        </Button>
+                      </ModalConfirmDelete>
+                    </TableCell>
+                  </TableRow>
+                ))
               : null}
 
             <TableRow data-hidden={!!channels?.length}>

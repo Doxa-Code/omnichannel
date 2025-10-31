@@ -54,6 +54,19 @@ export class WhatsappConnectionStrategy
       `/${wabaId}/phone_numbers?access_token=${access_token}`
     );
 
+    try {
+      const overrideCallback = await metaClient.post(
+        `/${wabaId}/subscribed_apps`,
+        {
+          override_callback_uri: `${process.env.CALLBACK_OVERRIDE}`,
+          verify_token: `olivia_connection_callback_override_verify_token`,
+        },
+        { headers: { Authorization: `${access_token}` } }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
     return {
       accessToken: access_token,
       businessId,

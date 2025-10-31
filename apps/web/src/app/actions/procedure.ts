@@ -15,6 +15,7 @@ const membershipsRepository = MembershipsDatabaseRepository.instance();
 export const securityProcedure = (permissions?: PolicyName[]) =>
   createServerActionProcedure()
     .handler(async () => {
+      console.log("PING");
       let user: User | null;
       let workspaceId: string | null;
 

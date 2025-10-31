@@ -108,6 +108,39 @@ export const messageReceived = securityProcedure([
     };
   });
 
+// export const metaVerifyToken = securityProcedure([
+//   "view:conversation",
+//   "view:conversations",
+// ])
+//   .input(
+//     z.object({
+//       "hub.challenge": z.string().optional(),
+//       "hub.mode": z.string().optional(),
+//       "hub.verify_token": z.string().optional(),
+//     })
+//   )
+//   .onError(async (err) => {
+//     console.error("Meta verify error:", err);
+//   })
+//   .handler(async ({ input, ctx }) => {
+//     console.log("Meta verify input:", input);
+
+//     const challenge = input["hub.challenge"];
+
+//     if (challenge) {
+//       return new Response(challenge, {
+//         status: 200,
+//         headers: { "Content-Type": "text/plain" },
+//       });
+//     }
+//     return new Response("Missing challenge", { status: 400 });
+//   });
+
+export const metaVerifyToken = async ({ input, ctx }) => {
+  console.log("Incoming message:", input);
+  return new Response("EVENT_RECEIVED", { status: 200 });
+};
+
 export const listenAudio = securityProcedure([
   "view:conversation",
   "view:conversations",

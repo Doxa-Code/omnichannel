@@ -46,7 +46,7 @@ export const connectChannel = securityProcedure(["manage:connections"])
       type: z.enum(["whatsapp", "instagram"]),
       inputPayload: z.any().optional(),
     })
-  )
+  ).onError(async err => console.log(err))
   .handler(async ({ ctx, input }) => {
     await ConnectChannel.instance().execute({
       workspaceId: ctx.membership.workspaceId,

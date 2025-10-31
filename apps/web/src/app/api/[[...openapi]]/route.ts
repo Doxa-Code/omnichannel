@@ -4,6 +4,7 @@ import {
   listenAudio,
   markLastMessagesContactAsViewed,
   messageReceived,
+  metaVerifyToken,
   retrieveImage,
   sendMessage,
   sendTyping,
@@ -21,8 +22,9 @@ const router = createOpenApiServerActionRouter({
   .get("/conversation/{conversationId}", retrieveConversation)
   .get("/message/{messageId}/audio", listenAudio)
   .get("/message/{messageId}/image", retrieveImage)
-  .post("/message/status", changeStatusMessage)
+  .get("/message/received", metaVerifyToken)
   .post("/message/received", messageReceived)
+  .post("/message/status", changeStatusMessage)
   .post("/message/viewed", markLastMessagesContactAsViewed)
   .post("/message/send", sendMessage)
   .post("/message/typing", sendTyping);
